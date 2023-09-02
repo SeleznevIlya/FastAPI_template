@@ -20,7 +20,7 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 class AbstractRepository(ABC):
     
     @abstractmethod
-    async def find_all_or_none():
+    async def find_one_or_none():
         raise NotImplementedError
     
     @abstractmethod
@@ -57,7 +57,7 @@ class BaseRepository(AbstractRepository, Generic[ModelType, CreateSchemaType, Up
     model = None
 
     @classmethod
-    async def find_all_or_none(cls, session: AsyncSession, *filter, **filter_by) -> Optional[ModelType]:
+    async def find_one_or_none(cls, session: AsyncSession, *filter, **filter_by) -> Optional[ModelType]:
         stmt = select(cls.model).filter(*filter).filter_by(**filter_by)
         result = await session.execute(stmt)
         return result.scalars().one_or_none()
