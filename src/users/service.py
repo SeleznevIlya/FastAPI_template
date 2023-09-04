@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import jwt
 from fastapi import HTTPException, status
+from typing import List
 
 from .utils import is_valid_password, get_password_hash
 from .schemas import Token, UserCreate, UserCreateDB, UserUpdate, UserUpdateDB, User
@@ -120,7 +121,7 @@ class UserService:
             db_user = await UserRepository.add(
                 session,
                 UserCreateDB(
-                    **user.model_dump,
+                    **user.model_dump(),
                     hashed_password=get_password_hash(user.password)
                 )
             )
