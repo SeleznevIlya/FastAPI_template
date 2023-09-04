@@ -69,7 +69,7 @@ class AuthService:
     @classmethod
     async def logout(cls, token: uuid.UUID) -> None:
         async with async_session_maker() as session:
-            refresh_session = RefreshSessionRepository.find_one_or_none(session, RefreshSessionModel.refresh_token==token)
+            refresh_session = await RefreshSessionRepository.find_one_or_none(session, RefreshSessionModel.refresh_token==token)
             if refresh_session:
                 await RefreshSessionRepository.delete(session, id=refresh_session.id)
             await session.commit()
@@ -89,7 +89,7 @@ class AuthService:
             await session.commit()
 
     @classmethod
-    async def _create_access_token(cls, user_id: uuid.UUID) -> str:
+    def _create_access_token(cls, user_id: uuid.UUID) -> str:
         to_encode = {
             "sub": str(user_id),
             "exp": datetime.utcnow() + timedelta(
@@ -101,7 +101,7 @@ class AuthService:
         return f"Bearer {encoded_jwt}"
 
     @classmethod
-    async def _create_refresh_token(cls) -> str:
+    def _create_refresh_token(cls) -> str:
         return uuid.uuid4()
 
 
