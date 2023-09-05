@@ -47,7 +47,7 @@ class AuthService:
                 await RefreshSessionRepository.delete(session, id=refresh_session.id)
                 raise TokenExpiredException
 
-            user = await UserRepository.find_one_or_none(session, id=refresh_session.id)
+            user = await UserRepository.find_one_or_none(session, id=refresh_session.user_id)
             if user is None:
                 raise InvalidTokenException
             

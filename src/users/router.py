@@ -1,3 +1,4 @@
+import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Response, Request, status
@@ -8,7 +9,7 @@ from .service import UserService, AuthService
 from ..exceptions import InvalidCredentialsException
 from ..config import settings
 from .models import UserModel
-from .dependencies import get_current_active_user
+from .dependencies import get_current_active_user, get_current_user
 
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
@@ -54,3 +55,39 @@ async def logout(request: Request,
 
     await AuthService.logout(request.cookies.get("refresh_token"))
     return {"message": "Logged out successfully"}
+
+
+@auth_router.post("/refresh")
+async def refresh_token(
+    response: Response,
+    request: Request
+) -> Token:
+    new_token = await AuthService.refresh_token(
+        uuid.UUID(request.cookies.get("refresh_token"))
+    )
+
+    response.set_cookie(
+        "access_token",
+        new_token.access_token,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES*60,
+        httponly=True
+    )
+    response.set_cookie(
+        "refresh_token",
+        new_token.refresh_token,
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS*30*24*60,
+        httponly=True
+    )
+    return new_token
+
+
+@auth_router.post("/abort")
+async def abort_all_sessions(
+    response: Response,
+    user: UserModel = Depends(get_current_user)
+):
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    
+    await AuthService.abort_all_session(user_id=user.id)
+    return {"message": "All session was aborted"}
