@@ -197,6 +197,7 @@ class UserService:
         #         email=db_user.email,
         #         fio=db_user.fio,
         #         is_active=db_user.is_active,
+        #         is_verified=db_user.is_verified,
         #         is_superuser=db_user.is_superuser
         #     ) for db_user in users
         # ]

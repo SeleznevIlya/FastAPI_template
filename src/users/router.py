@@ -4,12 +4,12 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Response, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .schemas import UserCreate, User, Token
+from .schemas import UserCreate, User, Token, UserUpdate
 from .service import UserService, AuthService
 from ..exceptions import InvalidCredentialsException
 from ..config import settings
 from .models import UserModel
-from .dependencies import get_current_active_user, get_current_user
+from .dependencies import get_current_active_user, get_current_user, get_current_superuser
 
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
@@ -91,3 +91,26 @@ async def abort_all_sessions(
     
     await AuthService.abort_all_session(user_id=user.id)
     return {"message": "All session was aborted"}
+
+
+@user_router.get("")
+async def get_user_list(
+        offset: Optional[int] = 0,
+        limit: Optional[int] = 100,
+        current_user: UserModel = Depends(get_current_superuser)
+) -> List[User]:
+    return await UserService.get_user_list(offset=offset, limit=limit)
+
+@user_router.get("/me")
+async def get_current_user(
+    current_user: UserModel = Depends(get_current_active_user)
+):
+    return await UserService.get_user(user_id=current_user.id)
+
+
+@user_router.put("/me")
+async def update_current_user(
+    user: UserUpdate,
+    current_user: UserModel = Depends(get_current_active_user)
+):
+    return await UserService.update_user(current_user.id, user)
