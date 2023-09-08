@@ -146,3 +146,12 @@ async def update_user(
     current_user: UserModel = Depends(get_current_superuser)
 ) -> User:
     return await UserService.update_user_from_superuser(user_id, user)
+
+
+@user_router.delete("/{user_id}")
+async def delete_user(
+    user_id: str,
+    current_user: UserModel = Depends(get_current_superuser)
+):
+    await UserService.delete_user_from_superuser(user_id)
+    return {"message": "User was deleted"}
