@@ -141,16 +141,16 @@ class UserService:
     @classmethod
     async def update_user(cls, user_id: uuid.UUID, user: UserUpdate) -> UserModel:
         async with async_session_maker() as session:
-            db_user = await UserRepository.find_one_or_none(session, id=user_id)
+            db_user = await UserRepository.find_one_or_none(session, UserModel.id == user_id)
             if db_user is None:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-                )
-            
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
             if user.password:
                 user_in = UserUpdateDB(
-                    **user.model_dump(
-                        exclude=("is_active", "is_verified", "is_superuser"),
+                    **user.model_dump
+                    (
+                        exclude={"is_active", "is_verified", "is_superuser"},
                         exclude_unset=True
                     ),
                     hashed_password=get_password_hash(user.password)
@@ -161,11 +161,10 @@ class UserService:
             user_update = await UserRepository.update(
                 session,
                 UserModel.id == user_id,
-                obj_in=user_in
-            )
+                obj_in=user_in)
             await session.commit()
-        return user_update
-
+            return user_update
+        
     @classmethod
     async def delete_user(cls, user_id: uuid.UUID) -> None:
         async with async_session_maker() as session:
@@ -174,11 +173,15 @@ class UserService:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
                 )
-            await UserRepository.update(
+            # await UserRepository.update(
+            #     session,
+            #     UserModel.id == user_id,
+            #     obj_in={"is_active": False}
+            # )
+            await UserRepository.delete(
                 session,
                 UserModel.id == user_id,
-                {"is_active": False}
-            )
+                )
             await session.commit()
 
     @classmethod
@@ -205,9 +208,9 @@ class UserService:
         
         
     @classmethod
-    async def update_user_from_superuser(cls, user_id: uuid.UUID, user: UserUpdate) -> User:
+    async def update_user_from_superuser(cls, user_id: uuid.UUID, user: UserUpdate) -> UserModel:
         async with async_session_maker() as session:
-            db_user = await UserRepository.find_one_or_none(session, id=user_id)
+            db_user = await UserRepository.find_one_or_none(session, UserModel.id == user_id)
             if db_user is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -217,10 +220,12 @@ class UserService:
             user_update = await UserRepository.update(
                 session,
                 UserModel.id == user_id,
-                obj_in=user_id
+                obj_in=user_in
             )
             await session.commit()
             return user_update
+        
+    
 
     @classmethod
     async def delete_user_from_superuser(cls, user_id: uuid.UUID) -> None:

@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Optional, List, Union, Dict
+from typing import TypeVar, Generic, Optional, List, Union, Dict, Any
 
 from abc import ABC, abstractmethod
 
@@ -83,7 +83,7 @@ class BaseRepository(AbstractRepository, Generic[ModelType, CreateSchemaType, Up
     @classmethod
     async def add(cls, 
                   session: AsyncSession, 
-                  obj_in: Union[CreateSchemaType, Dict[str, any]]
+                  obj_in: Union[CreateSchemaType, Dict[str, Any]]
                   ) -> Optional[ModelType]:
         if isinstance(obj_in, dict):
             create_data = obj_in
@@ -112,8 +112,8 @@ class BaseRepository(AbstractRepository, Generic[ModelType, CreateSchemaType, Up
     async def update(cls, 
                     session: AsyncSession,
                     *where,
-                    obj_in: Union[CreateSchemaType, Dict[str, any]]
-                    ):
+                    obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+                    ) -> Optional[ModelType]:
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
@@ -126,12 +126,12 @@ class BaseRepository(AbstractRepository, Generic[ModelType, CreateSchemaType, Up
             .returning(cls.model)
         )
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().one()
 
     @classmethod
     async def add_bulk(cls, 
                        session: AsyncSession, 
-                       data: List[Dict[str, any]]
+                       data: List[Dict[str, Any]]
                        ):
         try:
             result = await session.execute(
@@ -152,7 +152,7 @@ class BaseRepository(AbstractRepository, Generic[ModelType, CreateSchemaType, Up
     @classmethod
     async def update_bulk(cls, 
                           session: AsyncSession, 
-                          data: List[Dict[str, any]]):
+                          data: List[Dict[str, Any]]):
         try:
             stmt = update(cls.model)
             return await session.execute(stmt, data)

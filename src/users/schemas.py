@@ -39,7 +39,7 @@ class UserCreateDB(UserBase):
 
 
 class UserUpdateDB(UserBase):
-    hashed_password: str
+    hashed_password: Optional[str] = None
 
 
 class RefreshSessionCreate(BaseModel):

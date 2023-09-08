@@ -101,16 +101,48 @@ async def get_user_list(
 ) -> List[User]:
     return await UserService.get_user_list(offset=offset, limit=limit)
 
+
+@user_router.delete("/me")
+async def delete_current_user(
+    response: Response,
+    request: Request,
+    current_user: UserModel = Depends(get_current_user)
+):
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    await AuthService.logout(request.cookies.get("refresh_token"))
+    await UserService.delete_user(current_user.id)
+    return {"message": "User status is not active already"}
+
+
 @user_router.get("/me")
 async def get_current_user(
     current_user: UserModel = Depends(get_current_active_user)
-):
+) -> User:
     return await UserService.get_user(user_id=current_user.id)
 
 
 @user_router.put("/me")
 async def update_current_user(
     user: UserUpdate,
-    current_user: UserModel = Depends(get_current_active_user)
-):
+    current_user: UserModel = Depends(get_current_user)
+) -> User:
     return await UserService.update_user(current_user.id, user)
+
+
+@user_router.get("/{user_id}")
+async def get_user(
+    user_id: str,
+    current_user: UserModel = Depends(get_current_superuser)
+) -> User:
+    return await UserService.get_user(user_id=user_id)
+
+
+@user_router.put("/{user_id}")
+async def update_user(
+    user_id: str,
+    user: User,
+    current_user: UserModel = Depends(get_current_superuser)
+) -> User:
+    return await UserService.update_user_from_superuser(user_id, user)
