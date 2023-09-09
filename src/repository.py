@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pydantic import BaseModel
 
-from src.database import Base, async_session_maker
+from src.database import Base
 
 
 ModelType = TypeVar("ModelType", bound=Base)

@@ -1,0 +1,1 @@
+# FastAPI template for new project with built-in authentication

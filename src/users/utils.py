@@ -1,4 +1,4 @@
-from typing import Any, Coroutine, Dict, Optional, Union
+from typing import Dict, Optional
 from passlib.context import CryptContext
 
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel

@@ -6,13 +6,13 @@ from fastapi import HTTPException, status
 from typing import List
 
 from .utils import is_valid_password, get_password_hash
-from .schemas import Token, UserCreate, UserCreateDB, UserUpdate, UserUpdateDB, User
+from .schemas import Token, UserCreate, UserCreateDB, UserUpdate, UserUpdateDB
 from ..config import settings
 from ..database import async_session_maker
 from .repository import RefreshSessionRepository, UserRepository
 from .schemas import RefreshSessionCreate, RefreshSessionUpdate
 from .models import UserModel, RefreshSessionModel
-from ..exceptions import InvalidTokenException, TokenExpiredException, InvalidCredentialsException
+from ..exceptions import InvalidTokenException, TokenExpiredException
 
 
 
@@ -205,8 +205,6 @@ class UserService:
         #     ) for db_user in users
         # ]
         
-        
-        
     @classmethod
     async def update_user_from_superuser(cls, user_id: uuid.UUID, user: UserUpdate) -> UserModel:
         async with async_session_maker() as session:
@@ -225,8 +223,6 @@ class UserService:
             await session.commit()
             return user_update
         
-    
-
     @classmethod
     async def delete_user_from_superuser(cls, user_id: uuid.UUID) -> None:
         async with async_session_maker() as session:
