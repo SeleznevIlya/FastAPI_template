@@ -117,7 +117,7 @@ async def delete_current_user(
 
 
 @user_router.get("/me")
-async def get_current_user(
+async def get_current_user_me(
     current_user: UserModel = Depends(get_current_active_user)
 ) -> User:
     return await UserService.get_user(user_id=current_user.id)
@@ -129,6 +129,15 @@ async def update_current_user(
     current_user: UserModel = Depends(get_current_user)
 ) -> User:
     return await UserService.update_user(current_user.id, user)
+
+
+@user_router.put("/verify")
+async def verify_current_user(
+    # user: UserUpdate,
+    current_user: UserModel = Depends(get_current_user)
+):
+    await UserService.verify_user(current_user.id)
+    return {"message": "User was verified"}
 
 
 @user_router.get("/{user_id}")
@@ -155,3 +164,5 @@ async def delete_user(
 ):
     await UserService.delete_user_from_superuser(user_id)
     return {"message": "User was deleted"}
+
+

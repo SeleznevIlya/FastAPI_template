@@ -27,6 +27,10 @@ async def get_current_user(
         raise InvalidTokenException
     
     current_user = await UserService.get_user(uuid.UUID(user_id))
+    return current_user
+
+
+async def get_current_verified_user(current_user: UserModel = Depends(get_current_user)) -> UserModel:
     if not current_user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Verify email"

@@ -228,3 +228,22 @@ class UserService:
         async with async_session_maker() as session:
             await UserRepository.delete(session, UserModel.id == user_id)
             await session.commit()
+
+    @classmethod
+    async def verify_user(cls, user_id: uuid.UUID) -> UserModel:
+        async with async_session_maker() as session:
+            db_user = await UserRepository.find_one_or_none(session, UserModel.id == user_id)
+            if db_user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            user_in = UserUpdateDB(
+                    is_verified=True
+                )
+            
+            user_verify = await UserRepository.update(
+                session,
+                UserModel.id == user_id,
+                obj_in=user_in)
+            await session.commit()
+            return user_verify
+
