@@ -38,6 +38,18 @@ async def test_login(username, password, status_code, ac: AsyncClient):
         assert response_data["token_type"] == "bearer"
 
 
+async def test_verify_user(ac: AsyncClient):
+    await ac.post("/auth/login", 
+                            data={
+                                "username": "test@test.com",
+                                "password": "test"
+                                  },
+                            headers={"content-type": "application/x-www-form-urlencoded"}
+    )
+    response = await ac.put("/user/verify")
+    
+    assert response.json()["message"] == "User was verified"
+    assert response.json()["user"]['is_verified'] == True
 
 
 async def test_logout(ac: AsyncClient):
@@ -48,7 +60,7 @@ async def test_logout(ac: AsyncClient):
                                   },
                             headers={"content-type": "application/x-www-form-urlencoded"}
     )
-    await ac.put("/user/verify")
+   
 
     response = await ac.post("/auth/logout")
     # assert response.status_code == 200

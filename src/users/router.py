@@ -9,7 +9,7 @@ from .service import UserService, AuthService
 from ..exceptions import InvalidCredentialsException
 from ..config import settings
 from .models import UserModel
-from .dependencies import get_current_active_user, get_current_user, get_current_superuser
+from .dependencies import get_current_active_user, get_current_user, get_current_superuser, get_current_verified_user
 
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
@@ -136,8 +136,9 @@ async def verify_current_user(
     # user: UserUpdate,
     current_user: UserModel = Depends(get_current_user)
 ):
-    await UserService.verify_user(current_user.id)
-    return {"message": "User was verified"}
+    verified_user = await UserService.verify_user(current_user.id)
+    return {"message": "User was verified",
+            "user": verified_user}
 
 
 @user_router.get("/{user_id}")
